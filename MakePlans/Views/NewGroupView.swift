@@ -6,9 +6,9 @@
 //  Copyright © 2020 com.julianriemersma. All rights reserved.
 //
 
-import SwiftUI
 import Firebase
 import Resolver
+import SwiftUI
 
 struct NewGroupView: View {
     @Injected var session: SessionStore
@@ -21,51 +21,70 @@ struct NewGroupView: View {
     @State var isEditing = false
     
     var body: some View {
-        VStack {
-            TextField("Group Name", text: $groupName)
-                .padding(20)
-                .background(Color("lightGrey"))
-                .cornerRadius(5.0)
-                .padding(.top, 20)
-                .padding(.bottom, 20)
-            Spacer()
-                .frame(height: 30)
-            HStack {
-                Text("Add friends:")
-                    .font(.headline)
-                    .padding()
-                    .padding(.bottom, 30)
+        NavigationView {
+            VStack {
+                HStack {
+                    Text("Group name:")
+                        .font(.headline)
+                        .padding(.horizontal)
+                    Spacer()
+                }
+                TextField("Group Name", text: $groupName)
+                    .padding(20)
+                    .background(Color(.systemGray6))
+                    .cornerRadius(5.0)
+                    .padding(.horizontal)
                 Spacer()
-            }
-            SearchBar(text: $friendName, isEditing: $isEditing)
-                .padding(.top, -30)
-        
-            if isEditing {
+                    .frame(height: 30)
+                HStack {
+                    Text("Add friends:")
+                        .font(.headline)
+                        .padding(.horizontal)
+                    Spacer()
+                }
+                SearchBar(text: $friendName, isEditing: $isEditing)
+                
                 List(
-                    newGroupVM.userViewModels.filter({ userVM in
+                    newGroupVM.userViewModels.filter { userVM in
                         (friendName.isEmpty ? true : userVM.user.displayName?.contains(friendName) ?? false) &&
-                            userVM.user.displayName != session.user?.displayName
-                    })) { item in
+                        userVM.user.displayName != session.user?.displayName
+                    }) { item in
                         UserView(userViewModel: item, friends: $friends)
+                    }
+                    .listStyle(.plain)
+                
+                Spacer()
+                
+                Button(action: {
+                    self.newGroupVM.createGroup(groupName: groupName, users: friends) {
+                        self.presentationMode.wrappedValue.dismiss()
+                    }
+                }) {
+                    Text("Create group!")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .padding()
+                        .frame(width: 220, height: 60)
+                        .background(Color.blue)
+                        .cornerRadius(15.0)
                 }
             }
-        
-            Button(action: {
-                self.newGroupVM.createGroup(groupName: groupName, users: friends) {
-                    self.presentationMode.wrappedValue.dismiss()
-                }
-            }) {
-                Text("Create group!")
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .padding()
-                    .frame(width: 220, height: 60)
-                    .background(Color.blue)
-                    .cornerRadius(15.0)
+            .alert(isPresented: $newGroupVM.showingAlert) {
+                Alert(title: Text("Failed to create a group"), message: newGroupVM.alertInfo, dismissButton: .default(Text("Try again")))
             }
-        }
-        .alert(isPresented: $newGroupVM.showingAlert) {
-            Alert(title: Text("Failed to create a group"), message: newGroupVM.alertInfo, dismissButton: .default(Text("Try again")))
+            .navigationTitle("Create new group")
+            .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button(action: {
+                            self.presentationMode.wrappedValue.dismiss()
+                        }) {
+                            Image(systemName: "xmark.circle.fill")
+                                .resizable()
+                                .frame(width: 25, height: 25)
+                        }
+                        .foregroundColor(.black)
+                    }
+                }
         }
     }
 }
@@ -83,14 +102,8 @@ struct UserView: View {
     @State var isAdded = false
     
     var body: some View {
-            HStack {
-                Text(userViewModel.user.displayName!)
-                Spacer()
-                Image(systemName: isAdded ? "checkmark.circle.fill": "plus.circle.fill")
-                    .foregroundColor(Color.blue)
-                    .padding()
-            }
-            .onTapGesture(count: 1, perform: {
+        Button(action: {
+            withAnimation {
                 if isAdded {
                     isAdded.toggle()
                     self.friends?.removeAll { userID in
@@ -102,6 +115,18 @@ struct UserView: View {
                         self.friends = [self.userViewModel.user.id!]
                     }
                 }
-            })
+            }
+        }) {
+            HStack {
+                Text(userViewModel.user.displayName!)
+                Spacer()
+                Image(systemName: isAdded ? "checkmark.circle.fill" : "plus.circle.fill")
+                    .foregroundColor(isAdded ? Color.green : Color.blue)
+                    .font(.system(size: 25))
+                    .padding(.vertical, 4)
+                    .padding(.horizontal)
+            }
+        }
+        .foregroundColor(.primary)
     }
 }

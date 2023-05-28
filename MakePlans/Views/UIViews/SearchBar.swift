@@ -15,7 +15,7 @@ struct SearchBar: View {
     
     var body: some View {
         HStack {
-            TextField("Search ...", text: $text)
+            TextField("Search...", text: $text)
                 .padding(7)
                 .padding(.horizontal, 25)
                 .background(Color(.systemGray6))
@@ -28,16 +28,16 @@ struct SearchBar: View {
                         Image(systemName: "magnifyingglass")
                             .foregroundColor(.gray)
                             .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
-                            .padding(.leading, 8)
+                            .padding(.horizontal, 20)
                  
-                        if isEditing {
+                        if isEditing && !self.text.isEmpty {
                             Button(action: {
                                 self.text = ""
                             }) {
                                 Image(systemName: "multiply.circle.fill")
                                     .foregroundColor(.gray)
-                                    .padding(.trailing, 8)
                             }
+                            .padding(.horizontal, 20)
                         }
                     }
                 )
@@ -50,8 +50,7 @@ struct SearchBar: View {
                 }) {
                     Text("Cancel")
                 }
-                .padding(.trailing, 10)
-                .transition(.move(edge: .trailing))
+                .padding(.trailing, 20)
                 .animation(.default)
             }
         }
