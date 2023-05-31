@@ -1,5 +1,6 @@
 # MakePlans
-Simple (unfinished) app to make it easier to make plans with friends!
+![icon](MakePlans/Assets.xcassets/AppIcon.appiconset/mac128.png)
+> Simple (unfinished) app to make it easier to make plans with friends!
 # Usage
 1. Invite friends to a group.
 2. List all of your ideas.
